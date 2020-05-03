@@ -15,7 +15,7 @@ exports.verificaToken = function(req, res, next) {
         if(err) {
             return res.status(401).json({
                 ok: false,
-                mensaje: 'Token no valido',
+                mensaje: 'Token no valido!',
                 errors: err
             });
         }

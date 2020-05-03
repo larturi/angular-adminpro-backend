@@ -14,14 +14,17 @@ const GOOGLE_SECRET = require('../config/config').GOOGLE_SECRET;
 // Autenticacion por Google
 // ==============================================================
 
-app.post('/google', (req, res,next) =>{  
+app.post('/google', (req, res, next) =>{  
     var token = req.body.token;  
     const oAuth2Client = new OAuth2Client(
         GOOGLE_CLIENT_ID,     
         GOOGLE_SECRET   
     );   
     
-    const ticket = oAuth2Client.verifyIdToken({idToken: token, audience: GOOGLE_CLIENT_ID });   
+    const ticket = oAuth2Client.verifyIdToken({
+        idToken: token, 
+        audience: GOOGLE_CLIENT_ID 
+    });   
     
     ticket.then(data =>{     
 
@@ -60,19 +63,28 @@ app.post('/google', (req, res,next) =>{
                 var googleUser = data.payload;
     
                 var usuario = new Usuario();
-                usuario.nombre = googleUser.nombre;
+
+                usuario.nombre = googleUser.name;
                 usuario.email = googleUser.email;
                 usuario.img = googleUser.picture;
                 usuario.google = true;
                 usuario.password = ':)';
     
-                usuario.save((err, usuarioBD) => {
+                usuario.save( (err, usuarioBD) => {
+
+                    if(err) {
+                        return res.status(400).json({
+                            ok: false,
+                            mensaje: 'Error al actualizar usuario en la BD',
+                            errors: err
+                        });
+                    }
+
                     var token = jwt.sign({ usuario: usuarioBD}, SEED, {expiresIn : 14400});
     
                     res.status(200).json({
                         ok: true,
                         usuario,
-                        // googleUser,
                         token,
                         id: usuario.id
                     });
