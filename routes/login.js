@@ -24,10 +24,6 @@ app.post('/google', (req, res,next) =>{
     const ticket = oAuth2Client.verifyIdToken({idToken: token, audience: GOOGLE_CLIENT_ID });   
     
     ticket.then(data =>{     
-        // res.status(200).json({       
-        //     ok: true,       
-        //     tiket: data.payload     
-        // });
 
         Usuario.findOne({ email: data.payload.email}, (err, usuarioBD) => {
 
@@ -83,6 +79,14 @@ app.post('/google', (req, res,next) =>{
                 });
             }
 
+        });
+    })
+    .catch((err) => {
+        // next(err);
+        return res.status(400).json({
+            ok: true,
+            mensaje: 'Token no valido',
+            errors: err
         });
     });
 });
