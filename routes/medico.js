@@ -40,6 +40,96 @@ app.get('/', (req, res, next) => {
     });
 });
 
+// ==========================================
+// Obtener Medico
+// ==========================================
+
+app.get('/:id', (req, res) => {
+
+   var id = req.params.id;
+
+   Medico.findById(id)
+       .populate('usuario', 'nombre email img')
+       .populate('hospital')
+       .exec( (err, medico) => {
+
+       	if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar medico',
+                errors: err
+            });
+        }
+
+        if (!medico) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El medico con el id ' + id + ' no existe',
+                errors: { message: 'No existe un medico con ese ID' }
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            medico: medico
+        });
+
+     });
+
+
+});
+
+// ==========================================
+// Actualizar Medico
+// ==========================================
+app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+
+    var id = req.params.id;
+    var body = req.body;
+
+    Medico.findById(id, (err, medico) => {
+
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar medico',
+                errors: err
+            });
+        }
+
+        if (!medico) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El medico con el id ' + id + ' no existe',
+                errors: { message: 'No existe un medico con ese ID' }
+            });
+        }
+
+        medico.nombre = body.nombre;
+        medico.usuario = req.usuario._id;
+        medico.hospital = body.hospital;
+
+        medico.save((err, medicoGuardado) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar medico',
+                    errors: err
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                medico: medicoGuardado
+            });
+
+        });
+
+    });
+
+});
+
 // ==============================================================
 // Crear un nuevo medico
 // ==============================================================
@@ -69,57 +159,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             medico: medicoGuardado
         });
 
-    });
-});
-
-
-// ==============================================================
-// Actualizar Hospital
-// ==============================================================
-
-app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
-    var id = req.params.id;
-    var body = req.body;
-
-    Hospital.findById(id, (err, hospital) => {
-
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error al buscar hospital en la BD',
-                errors: err
-            });
-        }
-
-        if(!hospital) {
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'El hospital con el id ' + id + ' no existe',
-                errors: { message: 'No existe un hospital con el id ' + id }
-            });
-        }
-
-        hospital.nombre = body.nombre;
-        hospital.usuario = req.usuario._id;
-        
-        hospital.save( (err, hospitalGuardado) => {
-
-            if(err) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al actualizar hospital en la BD',
-                    errors: err
-                });
-            }
-
-            hospitalGuardado.password = ':)';
-
-            res.status(200).json({
-                ok: true,
-                hospital: hospitalGuardado
-            });
-        });
     });
 });
 
