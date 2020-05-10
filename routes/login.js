@@ -54,7 +54,8 @@ app.post('/google', (req, res, next) =>{
                         ok: true,
                         usuarioBD,
                         token,
-                        id: usuarioBD.id
+                        id: usuarioBD.id,
+                        menu: obtenerMenu(usuarioBD.role)
                     });
                 }
             } else {
@@ -86,7 +87,8 @@ app.post('/google', (req, res, next) =>{
                         ok: true,
                         usuario,
                         token,
-                        id: usuario.id
+                        id: usuario.id,
+                        menu: obtenerMenu(usuarioBD.role)
                     });
                 });
             }
@@ -145,10 +147,43 @@ app.post('/', (req, res) => {
             ok: true,
             usuarioBD,
             token,
-            id: usuarioBD.id
+            id: usuarioBD.id,
+            menu: obtenerMenu(usuarioBD.role)
         });
 
     });
 });
+
+function obtenerMenu(role) {
+
+    var menu = [
+    {
+      titulo: 'Principal',
+      icono: 'mdi mdi-gauge',
+      submenu: [
+         { titulo: 'Dashboard', url: '/dashboard'},
+         { titulo: 'ProgressBar', url: '/progress'},
+         { titulo: 'Gráficas', url: '/graficas1'},
+         { titulo: 'Promesas', url: '/promesas'},
+         { titulo: 'Rxjs', url: '/rxjs'}
+      ]
+    },
+    {
+      titulo: 'Administración',
+      icono: 'mdi mdi-folder-lock-open',
+      submenu: [
+        {titulo: 'Hospitales', url: '/hospitales'},
+        {titulo: 'Medicos', url: '/medicos'}
+      ]
+    }
+  ];
+
+  if(role === 'ADMIN_ROLE') {
+    menu[1].submenu.unshift({titulo: 'Usuarios', url: '/usuarios'});
+  }
+
+  return menu;
+
+}
 
 module.exports = app;
