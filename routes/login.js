@@ -10,6 +10,26 @@ const { OAuth2Client } = require('google-auth-library');
 const GOOGLE_CLIENT_ID = require('../config/config').GOOGLE_CLIENT_ID;
 const GOOGLE_SECRET = require('../config/config').GOOGLE_SECRET;
 
+var mdAutenticacion = require('../middlewares/autenticacion');
+
+
+// ==============================================================
+// Renueva Token
+// ==============================================================
+
+app.get('/renuevatoken', mdAutenticacion.verificaToken, (req, res) => {
+
+    usuarioBD = req.usuario;
+    usuarioBD.password = ':)';
+
+    var token = jwt.sign({ usuario: usuarioBD}, SEED, {expiresIn : 14400});
+
+    res.status(200).json({
+        ok: true,
+        token: token
+    });
+});
+
 // ==============================================================
 // Autenticacion por Google
 // ==============================================================
@@ -27,7 +47,7 @@ app.post('/google', (req, res, next) =>{
     });   
     
     ticket.then(data =>{     
-
+ 
         Usuario.findOne({ email: data.payload.email}, (err, usuarioBD) => {
 
             if (err) {
@@ -140,8 +160,8 @@ app.post('/', (req, res) => {
         }
 
         // Crear token
-        var token = jwt.sign({ usuario: usuarioBD}, SEED, {expiresIn : 14400});
         usuarioBD.password = ':)';
+        var token = jwt.sign({ usuario: usuarioBD}, SEED, {expiresIn : 14400});
 
         res.status(200).json({
             ok: true,
